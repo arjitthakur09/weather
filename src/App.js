@@ -10,48 +10,48 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
-  if (!city.trim()) return;
+    if (!city.trim()) return;
 
-  setWeatherData(null);
-  setLoading(true);
+    setWeatherData(null);         // clear previous data
+    setLoading(true);             // show loading
 
-  // Let React commit the loading state before fetch starts
-  await new Promise(resolve => setTimeout(resolve, 0));  // Trick to flush state to DOM
+    try {
+      const res = await fetch(
+        `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}`
+      );
+      const data = await res.json();
 
-  try {
-    const res = await fetch(
-      `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}`
-    );
-    const data = await res.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
 
-    if (data.error) {
-      alert("Failed to fetch weather data");
-      return;
+      setWeatherData(data);
+    } catch (err) {
+      console.error(err);
+      // Optional: show error message in UI
+    } finally {
+      setLoading(false);         // hide loading
     }
-
-    setWeatherData(data);
-  } catch (err) {
-    alert("Failed to fetch weather data");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="App">
       <h1>Weather Application</h1>
+
       <input
         type="text"
         placeholder="Enter city name"
         value={city}
         onChange={(e) => setCity(e.target.value)}
       />
+
       <button onClick={handleSearch}>Search</button>
 
-      {loading && <p>Loading data…</p>}
+      {/* Loading Message */}
+      {loading && <p role="status">Loading data…</p>}
 
-      {weatherData && (
+      {/* Show weather data */}
+      {weatherData && !loading && (
         <div className="weather-cards">
           <WeatherCard label="Temperature" value={`${weatherData.current.temp_c}°C`} />
           <WeatherCard label="Humidity" value={`${weatherData.current.humidity}%`} />
