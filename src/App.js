@@ -10,30 +10,33 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
-    if (!city.trim()) return;
+  if (!city.trim()) return;
 
-    setLoading(true);
-    setWeatherData(null);
+  setWeatherData(null);
+  setLoading(true);
 
-    try {
-      const res = await fetch(
-        `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}`
-      );
-      const data = await res.json();
+  // Let React commit the loading state before fetch starts
+  await new Promise(resolve => setTimeout(resolve, 0));  // Trick to flush state to DOM
 
-      if (data.error) {
-        alert("Failed to fetch weather data");
-        setLoading(false);
-        return;
-      }
+  try {
+    const res = await fetch(
+      `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}`
+    );
+    const data = await res.json();
 
-      setWeatherData(data);
-    } catch (err) {
+    if (data.error) {
       alert("Failed to fetch weather data");
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    setWeatherData(data);
+  } catch (err) {
+    alert("Failed to fetch weather data");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="App">
